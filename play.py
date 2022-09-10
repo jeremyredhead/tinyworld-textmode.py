@@ -43,10 +43,7 @@ if args.upload != None:
         if level[:-1] in args.upload:
             order.append(level)
     print('Downloading level map')
-    try:
-        storage.child('/all0.txt').download('data/levels.txt')
-    except TypeError:# terrible hack for pyrebase4 until I get a better solution
-        storage.child('/all0.txt').download('', 'data/levels.txt')
+    download('data/levels.txt')
     with open('data/levels.txt') as f:levels = f.readlines()
     for level in order:
         if level in levels:levels.remove(level)
@@ -64,19 +61,25 @@ print('T in Y World by Tom VII for Ludum Dare 23.')
 print()
 
 def download(file):
+    # all0 in firebase is actually levels.txt
+    if file == 'data/levels.txt':
+        level = 'all0'
+    else:
+        level = file[6:-4]
     if google:
-        if file == 'data/levels.txt':# all0 in firebase is actually levels.txt
-            storage.child('/all0.txt').download('data/levels.txt')
-        else:
-            valid = True
-            if not deprotect:
-                with open('data/protected.txt') as f:
-                    for line in f.readlines():
-                        if line[:-1] == file[6:-4]:
-                            valid = False
-                            break
-            if valid:
-                storage.child(file[6:]).download(file)
+        valid = True
+        if not deprotect and level != 'all0':
+            with open('data/protected.txt') as f:
+                for line in f.readlines():
+                    if line[:-1] == level:
+                        valid = False
+                        break
+        if valid:
+            storage.child('{}.txt'.format(level))
+            try:
+                storage.download(file)
+            except TypeError: # terrible hack for pyrebase4 until I get a better solution
+                storage.download('', file)
 
 def startdownload(file):
     if google:
