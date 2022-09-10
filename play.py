@@ -75,11 +75,11 @@ def download(file):
                         valid = False
                         break
         if valid:
-            storage.child('{}.txt'.format(level))
-            try:
-                storage.download(file)
-            except TypeError: # terrible hack for pyrebase4 until I get a better solution
-                storage.download('', file)
+            path = '{}.txt'.format(level)
+            try: # pyrebase
+                pyrebase.Storage.download(storage.child(path), file)
+            except TypeError: # Pyrebase4
+                pyrebase.Storage.download(storage, path, file)
 
 def startdownload(file):
     if google:
